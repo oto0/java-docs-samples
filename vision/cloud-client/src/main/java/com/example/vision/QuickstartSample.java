@@ -20,15 +20,11 @@ package com.example.vision;
 // [START vision_quickstart]
 // Imports the Google Cloud client library
 
-import com.google.cloud.vision.v1.AnnotateImageRequest;
-import com.google.cloud.vision.v1.AnnotateImageResponse;
-import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
-import com.google.cloud.vision.v1.EntityAnnotation;
-import com.google.cloud.vision.v1.Feature;
+import com.google.cloud.vision.v1.*;
 import com.google.cloud.vision.v1.Feature.Type;
-import com.google.cloud.vision.v1.Image;
-import com.google.cloud.vision.v1.ImageAnnotatorClient;
 import com.google.protobuf.ByteString;
+import org.threeten.bp.Duration;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,7 +34,7 @@ import java.util.List;
 public class QuickstartSample {
   public static void main(String... args) throws Exception {
     // Instantiates a client
-    try (ImageAnnotatorClient vision = ImageAnnotatorClient.create()) {
+    try {
 
       // The path to the image file to annotate
       String fileName = "./resources/wakeupcat.jpg";
@@ -47,6 +43,16 @@ public class QuickstartSample {
       Path path = Paths.get(fileName);
       byte[] data = Files.readAllBytes(path);
       ByteString imgBytes = ByteString.copyFrom(data);
+
+      ImageAnnotatorSettings.Builder settingsBuilder = ImageAnnotatorSettings.newBuilder();
+
+
+      settingsBuilder.batchAnnotateImagesSettings()
+          .setSimpleTimeoutNoRetries(Duration.ofMillis(3));
+
+      ImageAnnotatorSettings settings = settingsBuilder.build();
+
+      ImageAnnotatorClient vision = ImageAnnotatorClient.create(settings);
 
       // Builds the image annotation request
       List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -73,6 +79,9 @@ public class QuickstartSample {
               System.out.printf("%s : %s\n", k, v.toString()));
         }
       }
+    }
+    catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }
